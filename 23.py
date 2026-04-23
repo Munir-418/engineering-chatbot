@@ -70,7 +70,7 @@ BEHAVIOR:
 
 If the question is unclear, ask a short clarification first.
 """},
-        {"role": "user", "content": "assalam o alaikum"},
+        
       {"role": "assistant", "content": "👋 Hello! I am EngineerGPT.\nHow can I help you today in engineering?"}
     ]
 
