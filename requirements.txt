@@ -1,3 +1,4 @@
 streamlit
-numpy
-matplotlib
+groq
+python-dotenv
+streamlit-chat
