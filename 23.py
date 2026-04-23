@@ -68,6 +68,8 @@ BEHAVIOR:
 - Focus on understanding, not memorization
 - Help in assignments, exams, and projects
 
+         if any one use aoa give answer he's sakam not tell him full abrivation if any one ask for abrivation then tell him .
+
 If the question is unclear, ask a short clarification first.
 """},
         
