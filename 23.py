@@ -116,11 +116,33 @@ You can understand and respond in multiple languages based on the user’s input
 # RESPONSE
 # -----------------------------
 def get_response(messages):
+
+    last_user_msg = ""
+    for m in reversed(messages):
+        if m["role"] == "user":
+            last_user_msg = m["content"].lower()
+            break
+
+    # -----------------------------
+    # SMART MODEL ROUTING
+    # -----------------------------
+    if any(word in last_user_msg for word in ["integral", "solve", "derive", "prove", "calculate"]):
+        model = "llama-3.3-70b-versatile"   # heavy reasoning only
+    elif any(word in last_user_msg for word in ["code", "python", "debug", "program"]):
+        model = "openai/gpt-oss-20b"
+    else:
+        model = "llama-3.1-8b-instant"
+
+    # -----------------------------
+    # API CALL (NO TOKEN REDUCTION)
+    # -----------------------------
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
+        model=model,
+        messages=messages,   # keep FULL history (as you want)
         temperature=0.7
+       
     )
+
     return response.choices[0].message.content
 
 # -----------------------------
