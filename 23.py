@@ -1,21 +1,20 @@
 import streamlit as st
-from streamlit_chat import message
 from groq import Groq
 import os
 from dotenv import load_dotenv, find_dotenv
 
-# load .env file
+# load env
 load_dotenv(find_dotenv())
 
-# ✅ FIX 1: import os BEFORE using it
-# (already imported above)
-
-# Groq client
+# client
 client = Groq(api_key=os.getenv("api_key"))
 
 st.title("🤖 EngineerGPT")
 st.subheader("Your Smart Engineering Assistant")
 
+# -----------------------------
+# INITIAL MESSAGE
+# -----------------------------
 def get_initial_message():
     return [
         {"role": "system", "content": """
@@ -75,6 +74,10 @@ If the question is unclear, ask a short clarification first.
       {"role": "assistant", "content": "👋 Hello! I am EngineerGPT.\nHow can I help you today in engineering?"}
     ]
 
+
+# -----------------------------
+# RESPONSE
+# -----------------------------
 def get_response(messages):
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -83,38 +86,31 @@ def get_response(messages):
     )
     return response.choices[0].message.content
 
-def update_chat(messages, role, content):
-    messages.append({"role": role, "content": content})
-    return messages
-
-# session state
+# -----------------------------
+# SESSION
+# -----------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = get_initial_message()
 
-if "generated" not in st.session_state:
-    st.session_state.generated = []
+# -----------------------------
+# DISPLAY CHAT
+# -----------------------------
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.chat_message("user").write(msg["content"])
+    elif msg["role"] == "assistant":
+        st.chat_message("assistant").write(msg["content"])
 
-if "past" not in st.session_state:
-    st.session_state.past = []
+# -----------------------------
+# INPUT
+# -----------------------------
+prompt = st.chat_input("👋 How may I assist you today?")
 
+if prompt:
+    st.chat_message("user").write(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-# INPUT WITH AUTO CLEAR
-with st.form(key="chat_form", clear_on_submit=True):
-    prompt = st.text_input("👋 How may I assist you today?")
-    submit = st.form_submit_button("Send")
+    response = get_response(st.session_state.messages)
 
-if submit and prompt:
-    messages = st.session_state.messages
-
-    messages = update_chat(messages, "user", prompt)
-    response = get_response(messages)
-    messages = update_chat(messages, "assistant", response)
-
-    st.session_state.past.append(prompt)
-    st.session_state.generated.append(response)
-
-# display chat
-if st.session_state.generated:
-    for i in range(len(st.session_state.generated) - 1, -1, -1):
-        message(st.session_state.past[i], is_user=True, key=str(i) + "_u")
-        message(st.session_state.generated[i], key=str(i))  
+    st.chat_message("assistant").write(response)
+    st.session_state.messages.append({"role": "assistant", "content": response})
